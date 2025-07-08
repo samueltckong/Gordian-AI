@@ -22,8 +22,21 @@ logger = logging.getLogger(__name__)
 
 class Config:
     """Configuration for API keys, endpoints, and thresholds"""
-    GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
-    BLACKBOX_API_KEY = os.environ.get("BLACKBOX_API_KEY", "sk-GH2ndYhYrvneZGvCuB__jg")
+    
+    # Attempt to get API keys from Streamlit secrets first, then environment variables
+    try:
+        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+        BLACKBOX_API_KEY = st.secrets["BLACKBOX_API_KEY"]
+    except (AttributeError, KeyError):
+        GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+        BLACKBOX_API_KEY = os.environ.get("BLACKBOX_API_KEY")
+
+    # Ensure API keys are set, raise error if missing
+    if not GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY is not set in Streamlit secrets or environment variables")
+    if not BLACKBOX_API_KEY:
+        raise ValueError("BLACKBOX_API_KEY is not set in Streamlit secrets or environment variables")
+
     STALE_DAYS_THRESHOLD = 365
     VERY_STALE_DAYS_THRESHOLD = 730
     NPM_REGISTRY_BASE = "https://registry.npmjs.org"
