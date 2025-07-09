@@ -19,23 +19,50 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Fix for the Config class - replace your existing Config class with this:
+
 class Config:
     """Configuration for API keys, endpoints, and thresholds"""
+    # Default values
+    _GROQ_API_KEY = None
+    _BLACKBOX_API_KEY = None
     
-    # Attempt to get API keys from Streamlit secrets first, then environment variables
-    try:
-        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-        BLACKBOX_API_KEY = st.secrets["BLACKBOX_API_KEY"]
-    except (AttributeError, KeyError):
-        GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-        BLACKBOX_API_KEY = os.environ.get("BLACKBOX_API_KEY")
-
-    # Ensure API keys are set, raise error if missing
-    if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY is not set in Streamlit secrets or environment variables")
-    if not BLACKBOX_API_KEY:
-        raise ValueError("BLACKBOX_API_KEY is not set in Streamlit secrets or environment variables")
-
+    @classmethod
+    def get_groq_key(cls):
+        """Get GROQ API key from secrets or environment"""
+        if cls._GROQ_API_KEY is None:
+            try:
+                # Try Streamlit secrets first
+                import streamlit as st
+                cls._GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
+            except:
+                # Fall back to environment variable
+                cls._GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+        return cls._GROQ_API_KEY
+    
+    @classmethod
+    def get_blackbox_key(cls):
+        """Get BlackBox API key from secrets or environment"""
+        if cls._BLACKBOX_API_KEY is None:
+            try:
+                # Try Streamlit secrets first
+                import streamlit as st
+                cls._BLACKBOX_API_KEY = st.secrets.get("BLACKBOX_API_KEY", "")
+            except:
+                # Fall back to environment variable
+                cls._BLACKBOX_API_KEY = os.environ.get("BLACKBOX_API_KEY", "")
+        return cls._BLACKBOX_API_KEY
+    
+    # Use properties for backward compatibility
+    @property
+    def GROQ_API_KEY(self):
+        return self.get_groq_key()
+    
+    @property
+    def BLACKBOX_API_KEY(self):
+        return self.get_blackbox_key()
+    
+    # Static configuration values
     STALE_DAYS_THRESHOLD = 365
     VERY_STALE_DAYS_THRESHOLD = 730
     NPM_REGISTRY_BASE = "https://registry.npmjs.org"
