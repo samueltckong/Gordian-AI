@@ -2,7 +2,7 @@
     <h1>Gordian.ai</h1>
     <p>An AI-powered smart `npm` package dependency visualizer and analyzer</p>
     <br />
-    <img src="![Our app](demo.png)">
+    <img src="https://github.com/samueltckong/Gordian-AI/blob/main/demo.png">
     <br />
     <br />
     <a href="https://gordian-ai.streamlit.app">View Demo</a>
