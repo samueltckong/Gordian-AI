@@ -7,7 +7,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import logging
 import re
-import time
 
 # Try to import Groq with error handling
 try:
