@@ -761,7 +761,7 @@ def ui_dashboard(pkg_info: PackageInfo):
 
 def main():
     """Main Streamlit application entrypoint."""
-    st.set_page_config(page_title="Gordian AI", page_icon="🛡️", layout="wide")
+    st.set_page_config(page_title="Gordian.ai - Migration Assistant", page_icon="🛡️", layout="wide")
     
     # Custom CSS
     st.markdown("""
@@ -787,17 +787,19 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    st.title("🛡️ Gordian - AI Driven Software Intelligence")
+    st.title("🛡️ Gordian - AI Package Analytics & Migration")
     st.caption("Powered by GROQ and BlackboxAI for intelligent package analysis and migration assistance")
 
-    # Initialize state
+    # Initialize state with the new Config methods
     if 'groq_client' not in st.session_state:
-        st.session_state.groq_client = Groq(api_key=Config.GROQ_API_KEY) if Groq and Config.GROQ_API_KEY else None
+        groq_key = Config.get_groq_key()
+        st.session_state.groq_client = Groq(api_key=groq_key) if Groq and groq_key else None
     
     if 'blackbox_agent' not in st.session_state:
-        st.session_state.blackbox_agent = BlackboxAIAgent(Config.BLACKBOX_API_KEY) if Config.BLACKBOX_API_KEY else None
+        blackbox_key = Config.get_blackbox_key()
+        st.session_state.blackbox_agent = BlackboxAIAgent(blackbox_key) if blackbox_key else None
 
-    # Render UI
+    # Rest of your main function code...
     ui_sidebar()
     
     col1, col2 = st.columns([1, 3])
@@ -807,7 +809,7 @@ def main():
         if 'current_package' in st.session_state and st.session_state.current_package:
             ui_dashboard(st.session_state.current_package)
         else:
-            # Welcome message with features
+            # Welcome message...
             st.markdown("""
             ### 👈 Enter a package name to begin
             
@@ -817,15 +819,28 @@ def main():
             - 🔄 **Migration Assistant** - Generate complete migration guides with BlackboxAI
             - 💻 **Code Generation** - Get working migration code examples
             - ⚡ **Smart Suggestions** - AI-powered alternative package recommendations
-            
-            **How it works:**
-            1. Enter an npm package name
-            2. Run AI analysis to assess package health
-            3. Review code usage in your repository
-            4. Generate migration guides if needed
-            5. Get complete, working code examples for migration
             """)
-            
 
+# Also update the @st.cache_data functions to use Config.get_groq_key():
+
+@st.cache_data(ttl=3600)
+def analyze_package_with_llm(package_info: PackageInfo, _groq_client) -> Dict:
+    """Analyze package using Groq for a detailed report."""
+    if not _groq_client:
+        return {"error": "Groq client not initialized."}
+    # ... rest of the function
+
+# Update the BlackboxAIAgent initialization:
+class BlackboxAIAgent:
+    """AI Agent for code generation and migration using BlackboxAI"""
+    
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or Config.get_blackbox_key()
+        self.base_url = "https://api.blackbox.ai/api/chat"
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {self.api_key}'
+        }
+        
 if __name__ == "__main__":
     main()
